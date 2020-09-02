@@ -8,7 +8,7 @@ pub struct Db {
 
 impl Db {
     pub fn new() -> Db {
-        let conn = Connection::open_in_memory().unwrap();
+        let conn = Connection::open(&"xd.db").unwrap();
         Db{
             conn
         }
@@ -17,13 +17,13 @@ impl Db {
     pub fn make_new_table(&self) -> Result<()>{
         let conn = &self.conn;
         conn.execute("
-            CREATE TABLE lists (
+            CREATE TABLE IF NOT EXISTS lists (
                 id      INTEGER PRIMARY KEY
             )
         ", params![])?;
 
         conn.execute("
-            CREATE TABLE todos (
+            CREATE TABLE IF NOT EXISTS todos (
                 id          INTEGER PRIMARY KEY,
                 list_id     INTEGER,
                 title       TEXT,
@@ -71,9 +71,7 @@ impl Db {
     }
 
     pub fn get_list(&self, list_id: i32) -> List {
-        let mut statement = self.conn.prepare("
-            SELECT todos.* FROM lists, todos WHERE lists.id=?1
-        ").unwrap();
+        let mut statement = self.conn.prepare("SELECT * FROM todos WHERE list_id=?1").unwrap();
 
         let todos = statement.query_map(
             params![list_id],
