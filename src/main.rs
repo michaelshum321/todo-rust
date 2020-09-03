@@ -23,10 +23,12 @@ fn main() {
     // dbg!(output);
     // let dur = time::Duration::from_millis(5000);
     // ui::init();
-    ui::read_stuff();
+    let writer = &mut String::new();
+    ui::read_loop(writer);
     // thread::sleep(dur);
     ui::stop();
     // ui::restore_term();
+    println!("uwu! {}",writer.to_string());
 }
 
 // Overview: Has list of todos
