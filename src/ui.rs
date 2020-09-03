@@ -1,13 +1,15 @@
 extern crate ncurses;
 
 use crate::Todo;
-use ncurses::{noecho, initscr, keypad, stdscr, start_color, init_pair, COLOR_PAIR, attr_on, addstr, attr_off, refresh, getch, COLOR_GREEN, COLOR_BLACK, attr_t, COLOR_RED};
+use ncurses::{noecho, initscr, keypad, stdscr, start_color, init_pair, COLOR_PAIR, attr_on, addstr, attr_off, refresh, getch, COLOR_GREEN, COLOR_BLACK, attr_t, COLOR_RED, erase};
 use std::char::from_digit;
 // use std::char;
 
 type Pair = i16;
 static PAIR_DEFAULT: Pair = 1;
 static PAIR_STUFF: Pair = 2;
+static PAIR_FOCUS_DISPLAY: Pair = 3;
+static PAIR_FOCUS_INPUT: Pair = 4;
 
 const UP_ARROW: i32 = 'A' as i32;
 const DOWN_ARROW: i32 = 'B' as i32;
@@ -16,6 +18,7 @@ const LEFT_ARROW: i32 = 'D' as i32;
 
 const ENTER:u32 = 13;
 const ESC:u32 = 27;
+const TAB:i32 = 9;
 
 pub fn init() {
     initscr();
@@ -25,6 +28,70 @@ pub fn init() {
 
     init_pair(PAIR_DEFAULT, COLOR_GREEN, COLOR_BLACK);
     init_pair(PAIR_STUFF, COLOR_RED, COLOR_BLACK);
+    init_pair(PAIR_FOCUS_DISPLAY, ncurses::COLOR_WHITE, ncurses::COLOR_BLUE);
+    init_pair(PAIR_FOCUS_INPUT, ncurses::COLOR_BLACK, ncurses::COLOR_BLUE);
+}
+
+pub fn clear() {
+    erase();
+}
+
+pub fn edit(content: Vec<String>, focus:usize) -> Vec<String>{
+    clear();
+
+    // display Titles
+    let mut output: Vec<String> = Vec::new();
+    
+    attr_on(ncurses::A_BOLD());
+    for (i, item) in content.iter().enumerate() {
+        if i == focus {
+            ncurses::attr_off(COLOR_PAIR(PAIR_DEFAULT));
+            attr_on(COLOR_PAIR(PAIR_FOCUS_DISPLAY));
+        }
+        addstr(item.as_str());
+        addstr("\n");
+        addstr("=========\n\n");
+
+        if i == focus {
+            ncurses::attr_off(COLOR_PAIR(PAIR_FOCUS_DISPLAY));
+            attr_on(COLOR_PAIR(PAIR_DEFAULT));
+        }
+    }
+    attr_on(ncurses::A_BOLD());
+
+    ncurses::mv((focus as i32) * 3 + 2, 0);
+    attr_on(ncurses::A_BLINK());
+    ncurses::curs_set(ncurses::CURSOR_VISIBILITY::CURSOR_VERY_VISIBLE);
+    ncurses::echo();
+
+    let row = &mut String::new();
+
+    loop{
+        
+        let ch1 = getch();
+        if ch1 == ncurses::KEY_ENTER || ch1 == TAB {
+            // TODO change focus to next boi
+            
+            break;
+        }
+
+        row.push(std::char::from_u32(ch1 as u32).unwrap());
+    }
+    for x in 0..content.len() {
+        if focus == x {
+            output.push(row.to_string());
+        } else {
+            output.push(String::new());
+        }
+    }
+
+    noecho();
+    output
+}
+
+pub fn get_input_void() {
+    getch();
+    getch();
 }
 
 /**

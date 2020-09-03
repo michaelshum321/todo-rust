@@ -7,6 +7,13 @@ pub struct Todo{
 }
 
 impl Todo{
+    pub fn new() -> Todo {
+        Todo{
+            is_done: false,
+            title: String::new(),
+            description: String::new()
+        }
+    }
     pub fn toggle_todo(&mut self) {
         self.is_done = !self.is_done;
     }
