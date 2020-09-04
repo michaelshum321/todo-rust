@@ -1,10 +1,10 @@
 extern crate todo_app;
 
-use todo_app::List;
-use todo_app::Db;
-use todo_app::ui;
+// use todo_app::List;
+// use todo_app::Db;
+// use todo_app::ui;
 use todo_app::Controller;
-use std::{thread, time};
+// use std::{thread, time};
 
 fn main() {
     // ui::init();
